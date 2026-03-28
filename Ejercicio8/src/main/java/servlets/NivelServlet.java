@@ -8,6 +8,17 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+/**
+ * Servlet que recibe los puntos del jugador desde el formulario JSP,
+ * determina el nivel correspondiente según la tabla de clasificación
+ * y reenvía la respuesta a la vista resultado.jsp.
+ *
+ * Tabla de niveles:
+ *   0   – 250  → Principiante
+ *   251 – 600  → Intermedio
+ *   601 – 900  → Avanzado
+ *   901 – 1000 → Experto
+ */
 @WebServlet("/NivelServlet")
 public class NivelServlet extends HttpServlet {
 
@@ -20,6 +31,7 @@ public class NivelServlet extends HttpServlet {
         String puntosParam = request.getParameter("puntos");
         int puntos;
 
+        // ── Validación de entrada ────────────────────────────────────────────
         try {
             puntos = Integer.parseInt(puntosParam.trim());
         } catch (NumberFormatException e) {
@@ -32,10 +44,11 @@ public class NivelServlet extends HttpServlet {
             return;
         }
 
+        // ── Lógica de clasificación ──────────────────────────────────────────
         String nivel;
         String descripcion;
-        String color;   
-        int porcentaje;    
+        String color;      // color de acento para la vista
+        int porcentaje;    // progreso visual en barra
 
         if (puntos <= 250) {
             nivel       = "Principiante";
@@ -52,25 +65,29 @@ public class NivelServlet extends HttpServlet {
         } else if (puntos <= 900) {
             nivel       = "Avanzado";
             descripcion = "Excelente desempeño. Eres un jugador muy hábil.";
-            color       = "#ffb74d";
+            color       = "#ffb74d";   // naranja
             porcentaje  = 60 + Math.round(((puntos - 601) / 299f) * 25);
 
         } else {
             nivel       = "Experto";
             descripcion = "¡Nivel máximo! Dominas el juego a la perfección.";
-            color       = "#00ffb4";   
+            color       = "#00ffb4";   // cian / verde neón
             porcentaje  = 85 + Math.round(((puntos - 901) / 99f) * 15);
         }
 
+        // ── Pasar atributos a la vista ───────────────────────────────────────
         request.setAttribute("puntos",      puntos);
         request.setAttribute("nivel",       nivel);
         request.setAttribute("descripcion", descripcion);
         request.setAttribute("color",       color);
         request.setAttribute("porcentaje",  porcentaje);
 
+        // ── Forward a la JSP de resultado ────────────────────────────────────
         request.getRequestDispatcher("resultado.jsp")
                .forward(request, response);
     }
+
+    // Redirigir peticiones GET al formulario
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
