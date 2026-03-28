@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"   ✅
+
+      <!--
+          nivel.xhtml  —  Vista JSF (Facelets) del clasificador de jugador.
+
+    Funciona en una sola página: muestra el formulario y, tras el submit,
+    renderiza el panel de resultado usando rendered="#{nivelBean.calculado}".
+
+    Si el proyecto NO incluye PrimeFaces, sustituye <p:inputText> por
+    <h:inputText> y <p:commandButton> por <h:commandButton>. El resto
+    del markup es JSF estándar.
+      -->
+      <h:head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Nivel del Jugador — JSF</title>
+
+        <!-- Google Fonts -->
+        <h:outputStylesheet library="javax.faces" name="jsf.js"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Rajdhani:wght@300;400;600&amp;display=swap"
+              rel="stylesheet"/>
+
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                min-height: 100vh;
+                background: #0a0a0f;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Rajdhani', sans-serif;
+            }
+
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse at 20% 50%, rgba(0,255,180,.06) 0%, transparent 60%),
+                    repeating-linear-gradient(0deg,   transparent, transparent 40px, rgba(0,255,180,.012) 40px, rgba(0,255,180,.012) 41px),
+                    repeating-linear-gradient(90deg,  transparent, transparent 40px, rgba(0,255,180,.012) 40px, rgba(0,255,180,.012) 41px);
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .card {
+                position: relative;
+                z-index: 1;
+                width: 440px;
+                padding: 48px 40px;
+                background: rgba(255,255,255,.03);
+                border: 1px solid rgba(0,255,180,.18);
+                border-radius: 4px;
+                box-shadow: 0 0 40px rgba(0,255,180,.05);
+                animation: fadeIn .6s ease forwards;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity:0;
+                    transform:translateY(20px);
+                }
+                to   {
+                    opacity:1;
+                    transform:translateY(0);
+                }
+            }
+
+            /* ── Encabezado ────────────────────────────────── */
+            .badge {
+                font-family:'Orbitron',monospace;
+                font-size:10px;
+                letter-spacing:4px;
+                color:#00ffb4;
+                opacity:.7;
+                display:block;
+                margin-bottom:12px;
+            }
+            h1 {
+                font-family:'Orbitron',monospace;
+                font-size:24px;
+                font-weight:900;
+                color:#fff;
+                line-height:1.2;
+                text-shadow:0 0 30px rgba(0,255,180,.3);
+                margin-bottom:6px;
+            }
+            .subtitle {
+                font-size:15px;
+                color:rgba(255,255,255,.4);
+                margin-bottom:32px;
+            }
+
+            /* ── Tabla referencia ──────────────────────────── */
+            .ref-table {
+                width:100%;
+                border-collapse:collapse;
+                font-size:13px;
+                margin-bottom:32px;
+            }
+            .ref-table th {
+                font-family:'Orbitron',monospace;
+                font-size:9px;
+                letter-spacing:2px;
+                color:#00ffb4;
+                background:rgba(0,255,180,.07);
+                padding:9px 14px;
+                text-align:left;
+                text-transform:uppercase;
+            }
+            .ref-table td {
+                padding:7px 14px;
+                color:rgba(255,255,255,.55);
+                border-top:1px solid rgba(255,255,255,.05);
+            }
+            .ref-table td:first-child {
+                color:rgba(0,255,180,.8);
+                font-weight:600;
+            }
+
+            /* ── Formulario ────────────────────────────────── */
+            .field-label {
+                font-family:'Orbitron',monospace;
+                font-size:10px;
+                letter-spacing:3px;
+                color:rgba(255,255,255,.45);
+                text-transform:uppercase;
+                display:block;
+                margin-bottom:10px;
+            }
+            input[type=text], input[type=number] {
+                width:100%;
+                padding:14px 18px;
+                background:rgba(255,255,255,.04);
+                border:1px solid rgba(0,255,180,.25);
+                border-radius:4px;
+                color:#fff;
+                font-family:'Orbitron',monospace;
+                font-size:22px;
+                outline:none;
+                letter-spacing:2px;
+                transition:border-color .3s, box-shadow .3s;
+            }
+            input[type=text]:focus, input[type=number]:focus {
+                border-color:rgba(0,255,180,.6);
+                box-shadow:0 0 0 3px rgba(0,255,180,.08);
+            }
+            .hint {
+                font-size:12px;
+                color:rgba(255,255,255,.25);
+                margin-top:8px;
+            }
+
+            /* ── Botón enviar ──────────────────────────────── */
+            .btn-submit {
+                width:100%;
+                margin-top:24px;
+                padding:16px;
+                background:linear-gradient(135deg,#00ffb4 0%,#00c896 100%);
+                border:none;
+                border-radius:4px;
+                cursor:pointer;
+                font-family:'Orbitron',monospace;
+                font-size:11px;
+                font-weight:700;
+                letter-spacing:3px;
+                color:#0a0a0f;
+                text-transform:uppercase;
+                transition:opacity .2s, transform .2s, box-shadow .2s;
+                box-shadow:0 4px 24px rgba(0,255,180,.25);
+            }
+            .btn-submit:hover {
+                opacity:.9;
+                transform:translateY(-1px);
+                box-shadow:0 8px 32px rgba(0,255,180,.35);
+            }
+
+            /* ── Panel de resultado ────────────────────────── */
+            .resultado-panel {
+                text-align:center;
+                margin-top:36px;
+                padding-top:36px;
+                border-top:1px solid rgba(255,255,255,.07);
+            }
+            .res-icon {
+                font-size:52px;
+                margin-bottom:16px;
+                filter:drop-shadow(0 0 16px var(--accent,#00ffb4));
+            }
+            .res-puntos-lbl {
+                font-family:'Orbitron',monospace;
+                font-size:10px;
+                letter-spacing:4px;
+                color:rgba(255,255,255,.35);
+            }
+            .res-puntos-val {
+                font-family:'Orbitron',monospace;
+                font-size:48px;
+                font-weight:900;
+                color:var(--accent,#00ffb4);
+                line-height:1.1;
+                text-shadow:0 0 30px color-mix(in srgb, var(--accent,#00ffb4) 50%, transparent);
+            }
+            .res-max {
+                font-size:13px;
+                color:rgba(255,255,255,.25);
+                margin-bottom:20px;
+            }
+            .progress-wrap {
+                height:6px;
+                background:rgba(255,255,255,.06);
+                border-radius:2px;
+                overflow:hidden;
+                margin-bottom:28px;
+            }
+            .progress-fill {
+                height:100%;
+                background:var(--accent,#00ffb4);
+                border-radius:2px;
+                box-shadow:0 0 10px var(--accent,#00ffb4);
+                transition:width 1.2s ease;
+            }
+            .res-nivel-lbl {
+                font-family:'Orbitron',monospace;
+                font-size:10px;
+                letter-spacing:4px;
+                color:rgba(255,255,255,.3);
+                margin-bottom:6px;
+            }
+            .res-nivel-nombre {
+                font-family:'Orbitron',monospace;
+                font-size:32px;
+                font-weight:900;
+                color:#fff;
+                letter-spacing:2px;
+                margin-bottom:12px;
+            }
+            .res-desc {
+                font-size:15px;
+                color:rgba(255,255,255,.45);
+                margin-bottom:32px;
+                line-height:1.5;
+            }
+            .btn-nuevo {
+                padding:12px 32px;
+                background:transparent;
+                border:1px solid var(--accent,#00ffb4);
+                border-radius:4px;
+                color:var(--accent,#00ffb4);
+                cursor:pointer;
+                font-family:'Orbitron',monospace;
+                font-size:10px;
+                letter-spacing:3px;
+                text-transform:uppercase;
+                transition:background .25s, color .25s;
+            }
+            .btn-nuevo:hover {
+                background:var(--accent,#00ffb4);
+                color:#0a0a0f;
+            }
+        </style>
+    </h:head>
+
+    <h:body>
+        <div class="card">
+
+            <!-- ── Encabezado ──────────────────────────────────── -->
+            <span class="badge">// JSF · Sistema de niveles</span>
+            <h1>Clasificador<br/>de Jugador</h1>
+            <p class="subtitle">Ingresa tu puntaje para conocer tu nivel</p>
+
+            <!-- ── Tabla de referencia ─────────────────────────── -->
+            <table class="ref-table">
+                <tr><th>Puntos</th><th>Nivel</th></tr>
+                <tr><td>0 – 250</td><td>Principiante</td></tr>
+                <tr><td>251 – 600</td><td>Intermedio</td></tr>
+                <tr><td>601 – 900</td><td>Avanzado</td></tr>
+                <tr><td>901 – 1000</td><td>Experto</td></tr>
+            </table>
+
+            <!-- ── Formulario JSF ──────────────────────────────── -->
+            <h:form id="mainForm">
+                <label class="field-label" for="mainForm:puntosInput">Puntos obtenidos</label>
+
+                <h:inputText id="puntosInput"
+                             value="#{nivelBean.puntos}"
+                             styleClass="puntos-input"
+                             required="true"
+                             requiredMessage="Por favor ingresa los puntos.">
+                    <f:validateLongRange minimum="0" maximum="1000"
+                                         />
+                    <f:convertNumber integerOnly="true"/>
+                </h:inputText>
+
+                <p class="hint">Valor entre 0 y 1000 puntos</p>
+
+                <!-- Mensajes de validación -->
+                <h:messages for="mainForm:puntosInput"
+                            style="color:#ff6b6b; font-size:13px; display:block; margin-top:10px;"/>
+
+                <h:commandButton value="Determinar nivel →"
+                                 action="#{nivelBean.calcularNivel}"
+                                 styleClass="btn-submit"/>
+            </h:form>
+
+            <!-- ── Panel de resultado (se muestra sólo tras calcular) ── -->
+            <h:panelGroup rendered="#{nivelBean.calculado}" layout="block">
+                <div class="resultado-panel"
+                     style="--accent: #{nivelBean.color}">
+
+                    <div class="res-icon">#{nivelBean.icono}</div>
+
+                    <p class="res-puntos-lbl">Puntos obtenidos</p>
+                    <div class="res-puntos-val">#{nivelBean.puntos}</div>
+                    <p class="res-max">/ 1000 pts</p>
+
+                    <div class="progress-wrap">
+                        <div class="progress-fill"
+                             style="width: #{nivelBean.porcentaje}%"></div>
+                    </div>
+
+                    <p class="res-nivel-lbl">Tu nivel es</p>
+                    <div class="res-nivel-nombre">#{nivelBean.nivel}</div>
+
+                    <p class="res-desc">#{nivelBean.descripcion}</p>
+                </div>
+            </h:panelGroup>
+
+        </div>
+    </h:body>
+</html>
